@@ -6,48 +6,36 @@
 
 using namespace cv;
 using std::cout;
+using std::cin;
 using std::endl;
+
+const int XR = 12;
+const int YR = 12;
 
 int main(int argc, char* argv[])
 {
-	float BlendRate = 0.5;
-	if (argc == 1)
+
+	if (argc != 2)
 	{
-		cout << "用法：输入两个图片的路径，然后加上混合率，此程序将会将两张图片混合" << endl;
+		cout << "输入的参数格式不正确！" << endl;
 		return 1;
 	}
-	if (argc == 2)
+	Mat Input = imread(argv[1]);
+	if (!Input.data)
 	{
-		cout << "输入的图片路径太少！" << endl;
+		cout << "加载失败！" << endl; 
 		return 2;
 	}
-	if (argc == 3)
-	{
-		cout << "没有输入混合率，将会均匀混合！" << endl;
-	}
-	if (argc == 4)
-	{
-		BlendRate = atof(argv[3]);
-	}
 
-	Mat Input1 = imread(argv[1]);
-	if (!Input1.data)
-	{
-		cout << "读取图片1的内容时出错！" << endl;
-		return 3;
-	}
-	
-	Mat Input2 = imread(argv[2]);
-	if (!Input2.data)
-	{
-		cout << "读取图片2的内容时出错！" << endl;
-		return 4;
-	}
+	Mat Output = Input.clone();
+	blur(Input, Output, Size(XR,YR));
 
-	addWeighted(Input1, BlendRate, Input2, 1 - BlendRate, 0.0, Input1);
+	namedWindow("Original");
+	namedWindow("Target");
 
-	namedWindow("Blending");
-	imshow("Blending", Input1);
+	imshow("Original", Input);
+	imshow("Target", Output);
 
 	waitKey(0);
+	return 0;
 }
