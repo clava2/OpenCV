@@ -9,8 +9,8 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-const int XR = 12;
-const int YR = 12;
+const int XR = 13;
+const int YR = 13;
 
 int main(int argc, char* argv[])
 {
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	}
 
 	Mat Output = Input.clone();
-	blur(Input, Output, Size(XR,YR));
+	GaussianBlur(Input, Output, Size(XR,YR),0,0);
 
 	namedWindow("Original");
 	namedWindow("Target");
