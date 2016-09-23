@@ -8,44 +8,83 @@ using namespace cv;
 using std::cout;
 using std::cin;
 using std::endl;
+using std::vector;
 
-const int XR = 10;
-const int YR = 10;
+Mat InputImage, Target;
+Mat MapX, MapY;
 
-void showImage( int Value);
+const char* TargetWindowName = "Target";
+int ind = 0;
 
-Mat Input;
-Mat InputGray;
-Mat Output;
-
-int TrackValue1 = 3;
-int TrackValue2 = 0;
+void UpdateMap(void);
 
 int main(int argc, char* argv[])
 {
+
 	if (argc != 2)
 	{
-		cout << "输入的参数不正确！" << endl;
+		cout << "参数错误！" << endl;
 		return 1;
 	}
+	InputImage = imread(argv[1]);
+	Target.create(InputImage.size(), InputImage.type());
+	MapX.create(InputImage.size(), CV_32FC1);
+	MapY.create(InputImage.size(), CV_32FC1);
 
-	Input = imread(argv[1]);
+	namedWindow(TargetWindowName);
+	while (true)
+	{
+		int c = waitKey(1000);
+		if (c == '\n')
+		{
+			break;
+		}
 
-	cvtColor(Input, InputGray, CV_BGR2GRAY);
+		UpdateMap();
+		remap(InputImage,Target, MapX, MapY, CV_INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 0, 0));
 
-	namedWindow("Window1");
+		imshow(TargetWindowName, Target);
 
-	cvCreateTrackbar("Track1", "Window1", &TrackValue1,4,showImage);
+	}
 
-	cvCreateTrackbar("Track2", "Window1", &TrackValue2, 255, showImage);
-
-	showImage(0);
-
-	waitKey(0);
+	return 0;
 }
 
-void showImage(int Value)
+void UpdateMap(void)
 {
-	threshold(InputGray, Output, Value, 255, TrackValue1);
-	imshow("Window1", Output);
+	ind = ind % 4;
+	for (int j = 0; j != InputImage.rows; ++j)
+	{
+		for (int i = 0; i != InputImage.cols; ++i)
+		{
+			switch (ind)
+			{
+			case 0:
+				if (i > InputImage.cols * 0, 25 && i < InputImage.cols*0.75&&j>InputImage.rows*0.25&&j < InputImage.rows*0.75)
+				{
+					MapX.at<float>(j, i) = 2 * (i - InputImage.cols*0.25) + 0.5;
+					MapY.at<float>(j, i) = 2 * (j - InputImage.cols*0.25) + 0.5;
+				}
+				else
+				{
+					MapX.at<float>(j, i) = 0;
+					MapY.at<float>(j, i) = 0;
+				}
+				break;
+			case 1:
+				MapX.at<float>(j, i) = i;
+				MapY.at<float>(j, i) = InputImage.rows - j;
+				break;
+			case 2:
+				MapX.at<float>(j, i) = InputImage.cols - i;
+				MapY.at<float>(j, i) = j;
+				break;
+			case 3:
+				MapX.at<float>(j, i) = InputImage.cols - i;
+				MapY.at<float>(j, i) = InputImage.rows - j;
+				break;
+			}
+		}
+	}
+	ind++;
 }
